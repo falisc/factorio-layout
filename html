@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crafting Recipe Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #141b2d;
+            --bg-tertiary: #1a2332;
+            --accent-cyan: #00fff5;
+            --accent-magenta: #ff00ff;
+            --accent-yellow: #ffed4e;
+            --text-primary: #e8eaf0;
+            --text-secondary: #8b92a8;
+            --border-color: #2a3548;
+            --glow-cyan: rgba(0, 255, 245, 0.3);
+            --glow-magenta: rgba(255, 0, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 245, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 255, 0.05) 0%, transparent 50%);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta), var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            filter: drop-shadow(0 0 20px var(--glow-cyan));
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            letter-spacing: 3px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            animation: fadeIn 1s ease-out 0.3s backwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+            opacity: 0.5;
+        }
+
+        .panel-header {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-header::before {
+            content: '▸';
+            color: var(--accent-magenta);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px var(--glow-cyan);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            color: var(--bg-primary);
+            border: none;
+            padding: 0.9rem 2rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--glow-cyan);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+        }
+
+        .ingredient-list {
+            margin-top: 1rem;
+        }
+
+        .ingredient-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--accent-magenta);
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.4s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .ingredient-item:hover {
+            border-left-color: var(--accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .ingredient-text {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ingredient-amount {
+            color: var(--accent-yellow);
+            font-weight: 700;
+            min-width: 30px;
+        }
+
+        .btn-remove {
+            background: transparent;
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-remove:hover {
+            background: #ff4444;
+            color: white;
+        }
+
+        #canvas-container {
+            position: relative;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            min-height: 600px;
+            overflow: auto;
+        }
+
+        #recipe-canvas {
+            display: block;
+        }
+
+        .recipe-select {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .saved-recipes {
+            margin-top: 2rem;
+        }
+
+        .recipe-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recipe-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent-cyan);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .recipe-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .recipe-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .recipe-card-header {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .recipe-card-ingredients {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .info-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(0, 255, 245, 0.05);
+            border-left: 2px solid var(--accent-cyan);
+            border-radius: 2px;
+        }
+
+        .node {
+            cursor: move;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Crafting Nexus</h1>
+            <p class="subtitle">Recipe Dependency Tracker</p>
+        </header>
+
+        <div class="main-grid">
+            <div class="panel">
+                <h2 class="panel-header">New Recipe</h2>
+                
+                <div class="input-group">
+                    <label>Item Name</label>
+                    <input type="text" id="item-name" placeholder="e.g., Iron Sword">
+                </div>
+
+                <div class="input-group">
+                    <label>Ingredients (one per line)</label>
+                    <textarea id="ingredients-input" placeholder="Format: 2x Iron Ingot&#10;1x Stick&#10;3x Wood"></textarea>
+                    <p class="info-text">Use format: [amount]x [ingredient name]<br>
+                    💡 Just list ingredient names - if they're recipes, they'll auto-link!</p>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; flex-direction: column;">
+                    <button class="btn" onclick="addRecipe()">⚡ Add Recipe</button>
+                </div>
+
+                <div class="saved-recipes">
+                    <h3 class="panel-header">Saved Recipes</h3>
+                    <p class="info-text" style="margin-bottom: 1rem;">
+                        ✨ Click any recipe to visualize its full dependency tree!<br>
+                        The system automatically links sub-recipes.
+                    </p>
+                    <div id="recipe-list"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-header">Dependency Tree</h2>
+                
+                <div class="recipe-select">
+                    <select id="recipe-dropdown" onchange="visualizeRecipe()">
+                        <option value="">Select a recipe to visualize...</option>
+                    </select>
+                    <button class="btn-secondary" onclick="calculateTotalMaterials()">📊 Calculate Total</button>
+                    <button class="btn-secondary" onclick="clearCanvas()">🗑️ Clear</button>
+                </div>
+
+                <div id="canvas-container">
+                    <canvas id="recipe-canvas"></canvas>
+                </div>
+
+                <div id="total-materials" style="margin-top: 1rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const recipes = {};
+        const canvas = document.getElementById('recipe-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            canvas.width = container.clientWidth;
+            canvas.height = Math.max(600, container.clientHeight);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        function addRecipe() {
+            const itemName = document.getElementById('item-name').value.trim();
+            const ingredientsText = document.getElementById('ingredients-input').value.trim();
+
+            if (!itemName || !ingredientsText) {
+                alert('Please enter both item name and ingredients!');
+                return;
+            }
+
+            const ingredients = parseIngredients(ingredientsText);
+            recipes[itemName] = ingredients;
+
+            updateRecipeList();
+            updateDropdown();
+
+            document.getElementById('item-name').value = '';
+            document.getElementById('ingredients-input').value = '';
+        }
+
+        function parseIngredients(text) {
+            const lines = text.split('\n').filter(line => line.trim());
+            const ingredients = [];
+
+            for (const line of lines) {
+                const match = line.match(/(\d+)\s*x\s*(.+)/i);
+                if (match) {
+                    ingredients.push({
+                        amount: parseInt(match[1]),
+                        name: match[2].trim()
+                    });
+                }
+            }
+
+            return ingredients;
+        }
+
+        function updateRecipeList() {
+            const listDiv = document.getElementById('recipe-list');
+            listDiv.innerHTML = '';
+
+            for (const [item, ingredients] of Object.entries(recipes)) {
+                const card = document.createElement('div');
+                card.className = 'recipe-card';
+                card.style.display = 'flex';
+                card.style.justifyContent = 'space-between';
+                card.style.alignItems = 'center';
+
+                const contentDiv = document.createElement('div');
+                contentDiv.style.flex = '1';
+                contentDiv.onclick = () => selectRecipeForVisualization(item);
+                contentDiv.style.cursor = 'pointer';
+
+                const header = document.createElement('div');
+                header.className = 'recipe-card-header';
+                header.textContent = item;
+
+                const ingredientsList = document.createElement('div');
+                ingredientsList.className = 'recipe-card-ingredients';
+                ingredientsList.textContent = ingredients.length > 0 
+                    ? ingredients.map(ing => `${ing.amount}x ${ing.name}`).join(', ')
+                    : 'Base material (no recipe)';
+
+                contentDiv.appendChild(header);
+                contentDiv.appendChild(ingredientsList);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-remove';
+                deleteBtn.textContent = '✕';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (confirm(`Delete recipe for "${item}"?`)) {
+                        delete recipes[item];
+                        updateRecipeList();
+                        updateDropdown();
+                        clearCanvas();
+                    }
+                };
+
+                card.appendChild(contentDiv);
+                card.appendChild(deleteBtn);
+                listDiv.appendChild(card);
+            }
+        }
+
+        function updateDropdown() {
+            const dropdown = document.getElementById('recipe-dropdown');
+            dropdown.innerHTML = '<option value="">Select a recipe to visualize...</option>';
+
+            for (const item of Object.keys(recipes)) {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                dropdown.appendChild(option);
+            }
+        }
+
+        function selectRecipeForVisualization(item) {
+            document.getElementById('recipe-dropdown').value = item;
+            visualizeRecipe();
+        }
+
+        function visualizeRecipe() {
+            const selectedItem = document.getElementById('recipe-dropdown').value;
+            if (!selectedItem) {
+                clearCanvas();
+                return;
+            }
+
+            const tree = buildDependencyTree(selectedItem);
+            drawTree(tree);
+        }
+
+        function buildDependencyTree(itemName, visited = new Set()) {
+            if (visited.has(itemName)) {
+                return { name: itemName, amount: 1, ingredients: [], circular: true };
+            }
+
+            visited.add(itemName);
+
+            const recipe = recipes[itemName];
+            if (!recipe) {
+                return { name: itemName, amount: 1, ingredients: [], isBase: true };
+            }
+
+            const ingredients = recipe.map(ing => {
+                const subTree = buildDependencyTree(ing.name, new Set(visited));
+                return { ...subTree, amount: ing.amount };
+            });
+
+            return {
+                name: itemName,
+                amount: 1,
+                ingredients: ingredients
+            };
+        }
+
+        function drawTree(tree) {
+            clearCanvas();
+
+            const nodePositions = calculateNodePositions(tree);
+            
+            // Draw connections first
+            ctx.strokeStyle = '#00fff5';
+            ctx.lineWidth = 2;
+            drawConnections(nodePositions);
+
+            // Draw nodes
+            drawNodes(nodePositions);
+        }
+
+        function calculateNodePositions(tree, level = 0, index = 0, positions = [], levelCounts = {}) {
+            if (!levelCounts[level]) levelCounts[level] = 0;
+            const currentIndex = levelCounts[level]++;
+
+            const x = 150 + level * 250;
+            const y = 100 + currentIndex * 100;
+
+            const node = {
+                name: tree.name,
+                amount: tree.amount,
+                x: x,
+                y: y,
+                children: [],
+                isBase: tree.isBase,
+                circular: tree.circular
+            };
+
+            positions.push(node);
+
+            if (tree.ingredients) {
+                for (const ingredient of tree.ingredients) {
+                    const childNode = calculateNodePositions(ingredient, level + 1, currentIndex, positions, levelCounts);
+                    node.children.push(childNode);
+                }
+            }
+
+            return node;
+        }
+
+        function drawConnections(rootNode) {
+            function drawConnectionsRecursive(node) {
+                for (const child of node.children) {
+                    ctx.beginPath();
+                    ctx.moveTo(node.x + 60, node.y + 20);
+                    
+                    // Curved connection
+                    const midX = (node.x + 60 + child.x) / 2;
+                    ctx.bezierCurveTo(
+                        midX, node.y + 20,
+                        midX, child.y + 20,
+                        child.x, child.y + 20
+                    );
+                    
+                    ctx.stroke();
+
+                    // Arrow
+                    const angle = Math.atan2(child.y + 20 - node.y - 20, child.x - node.x - 60);
+                    ctx.save();
+                    ctx.translate(child.x - 5, child.y + 20);
+                    ctx.rotate(angle);
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-10, -5);
+                    ctx.lineTo(-10, 5);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+
+                    drawConnectionsRecursive(child);
+                }
+            }
+
+            drawConnectionsRecursive(rootNode);
+        }
+
+        function drawNodes(rootNode) {
+            function drawNodesRecursive(node) {
+                // Node background
+                const gradient = ctx.createLinearGradient(node.x, node.y, node.x + 120, node.y + 40);
+                
+                if (node.circular) {
+                    gradient.addColorStop(0, '#ff4444');
+                    gradient.addColorStop(1, '#cc0000');
+                } else if (node.isBase) {
+                    gradient.addColorStop(0, '#ffed4e');
+                    gradient.addColorStop(1, '#e6d400');
+                } else {
+                    gradient.addColorStop(0, '#1a2332');
+                    gradient.addColorStop(1, '#0a0e1a');
+                }
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(node.x, node.y, 120, 40);
+
+                // Border
+                ctx.strokeStyle = node.circular ? '#ff4444' : (node.isBase ? '#ffed4e' : '#00fff5');
+                ctx.lineWidth = 2;
+                ctx.strokeRect(node.x, node.y, 120, 40);
+
+                // Glow effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = node.circular ? 'rgba(255, 68, 68, 0.5)' : (node.isBase ? 'rgba(255, 237, 78, 0.5)' : 'rgba(0, 255, 245, 0.5)');
+                ctx.strokeRect(node.x, node.y, 120, 40);
+                ctx.shadowBlur = 0;
+
+                // Text
+                ctx.fillStyle = node.isBase && !node.circular ? '#0a0e1a' : '#e8eaf0';
+                ctx.font = '600 14px Rajdhani';
+                ctx.textAlign = 'left';
+                ctx.fillText(node.name, node.x + 8, node.y + 18);
+
+                // Amount
+                if (node.amount > 1) {
+                    ctx.fillStyle = '#ff00ff';
+                    ctx.font = '700 12px Orbitron';
+                    ctx.fillText(`×${node.amount}`, node.x + 8, node.y + 33);
+                }
+
+                for (const child of node.children) {
+                    drawNodesRecursive(child);
+                }
+            }
+
+            drawNodesRecursive(rootNode);
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('total-materials').innerHTML = '';
+        }
+
+        function calculateTotalMaterials() {
+            const selectedItem = document.getElementById('recipe-dropdown').value;
+            if (!selectedItem) {
+                alert('Please select a recipe first!');
+                return;
+            }
+
+            const totals = {};
+            
+            function calculateRecursive(itemName, amount) {
+                const recipe = recipes[itemName];
+                
+                // If no recipe exists or it's a base material (empty recipe array)
+                if (!recipe || recipe.length === 0) {
+                    totals[itemName] = (totals[itemName] || 0) + amount;
+                    return;
+                }
+
+                // If recipe exists, calculate ingredients recursively
+                for (const ingredient of recipe) {
+                    calculateRecursive(ingredient.name, ingredient.amount * amount);
+                }
+            }
+
+            calculateRecursive(selectedItem, 1);
+
+            const resultDiv = document.getElementById('total-materials');
+            
+            if (Object.keys(totals).length === 0) {
+                resultDiv.innerHTML = '<p class="info-text">No base materials needed - this might be a complex item with only intermediate crafting steps.</p>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<h3 class="panel-header">Total Materials Needed</h3>';
+            
+            const materialsDiv = document.createElement('div');
+            materialsDiv.style.display = 'grid';
+            materialsDiv.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+            materialsDiv.style.gap = '0.5rem';
+            materialsDiv.style.marginTop = '1rem';
+
+            for (const [material, amount] of Object.entries(totals)) {
+                const item = document.createElement('div');
+                item.className = 'ingredient-item';
+                item.innerHTML = `
+                    <div class="ingredient-text">
+                        <span class="ingredient-amount">${amount}x</span>
+                        <span>${material}</span>
+                    </div>
+                `;
+                materialsDiv.appendChild(item);
+            }
+
+            resultDiv.appendChild(materialsDiv);
+        }
+
+        // Add some example recipes on load
+        window.onload = () => {
+            // Base materials (no recipe)
+            recipes['Iron Ore'] = [];
+            recipes['Coal'] = [];
+            recipes['Wood Log'] = [];
+            recipes['Sulfur'] = [];
+            recipes['Saltpeter'] = [];
+            recipes['Charcoal'] = [];
+            
+            // Crafted items
+            recipes['Wood Plank'] = [
+                { amount: 1, name: 'Wood Log' }
+            ];
+            recipes['Stick'] = [
+                { amount: 2, name: 'Wood Plank' }
+            ];
+            recipes['Iron Ingot'] = [
+                { amount: 1, name: 'Iron Ore' },
+                { amount: 1, name: 'Coal' }
+            ];
+            recipes['Gunpowder'] = [
+                { amount: 1, name: 'Sulfur' },
+                { amount: 1, name: 'Saltpeter' },
+                { amount: 1, name: 'Charcoal' }
+            ];
+            
+            // Complex items that use other recipes
+            recipes['Iron Sword'] = [
+                { amount: 2, name: 'Iron Ingot' },
+                { amount: 1, name: 'Stick' }
+            ];
+            recipes['Bomb'] = [
+                { amount: 3, name: 'Gunpowder' },
+                { amount: 2, name: 'Iron Ingot' }
+            ];
+
+            updateRecipeList();
+            updateDropdown();
+        };
+    </script>
+</body>
+</html>
