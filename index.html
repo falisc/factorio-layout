@@ -418,8 +418,10 @@
                     <h3 class="panel-header">Saved Recipes</h3>
                     <p class="info-text" style="margin-bottom: 1rem;">
                         ✨ Click any recipe to visualize its full dependency tree!<br>
-                        The system automatically links sub-recipes.
+                        The system automatically links sub-recipes.<br>
+                        💾 Your recipes are saved automatically in your browser.
                     </p>
+                    <button class="btn-secondary" onclick="clearAllRecipes()" style="width: 100%; margin-bottom: 1rem;">🗑️ Clear All Recipes</button>
                     <div id="recipe-list"></div>
                 </div>
             </div>
@@ -445,9 +447,37 @@
     </div>
 
     <script>
-        const recipes = {};
+        let recipes = {};
         const canvas = document.getElementById('recipe-canvas');
         const ctx = canvas.getContext('2d');
+
+        // Load recipes from localStorage on startup
+        function loadRecipes() {
+            const saved = localStorage.getItem('craftingRecipes');
+            if (saved) {
+                try {
+                    recipes = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Error loading recipes:', e);
+                    recipes = {};
+                }
+            }
+        }
+
+        // Save recipes to localStorage
+        function saveRecipes() {
+            localStorage.setItem('craftingRecipes', JSON.stringify(recipes));
+        }
+
+        function clearAllRecipes() {
+            if (confirm('Are you sure you want to delete ALL recipes? This cannot be undone!')) {
+                recipes = {};
+                saveRecipes();
+                updateRecipeList();
+                updateDropdown();
+                clearCanvas();
+            }
+        }
 
         // Set canvas size
         function resizeCanvas() {
@@ -470,6 +500,7 @@
             const ingredients = parseIngredients(ingredientsText);
             recipes[itemName] = ingredients;
 
+            saveRecipes(); // Save to localStorage
             updateRecipeList();
             updateDropdown();
 
@@ -526,15 +557,18 @@
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'btn-remove';
                 deleteBtn.textContent = '✕';
-                deleteBtn.onclick = (e) => {
+                deleteBtn.setAttribute('data-item', item);
+                deleteBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    if (confirm(`Delete recipe for "${item}"?`)) {
-                        delete recipes[item];
+                    const itemToDelete = this.getAttribute('data-item');
+                    if (confirm(`Delete recipe for "${itemToDelete}"?`)) {
+                        delete recipes[itemToDelete];
+                        saveRecipes();
                         updateRecipeList();
                         updateDropdown();
                         clearCanvas();
                     }
-                };
+                });
 
                 card.appendChild(contentDiv);
                 card.appendChild(deleteBtn);
@@ -787,40 +821,47 @@
 
         // Add some example recipes on load
         window.onload = () => {
-            // Base materials (no recipe)
-            recipes['Iron Ore'] = [];
-            recipes['Coal'] = [];
-            recipes['Wood Log'] = [];
-            recipes['Sulfur'] = [];
-            recipes['Saltpeter'] = [];
-            recipes['Charcoal'] = [];
-            
-            // Crafted items
-            recipes['Wood Plank'] = [
-                { amount: 1, name: 'Wood Log' }
-            ];
-            recipes['Stick'] = [
-                { amount: 2, name: 'Wood Plank' }
-            ];
-            recipes['Iron Ingot'] = [
-                { amount: 1, name: 'Iron Ore' },
-                { amount: 1, name: 'Coal' }
-            ];
-            recipes['Gunpowder'] = [
-                { amount: 1, name: 'Sulfur' },
-                { amount: 1, name: 'Saltpeter' },
-                { amount: 1, name: 'Charcoal' }
-            ];
-            
-            // Complex items that use other recipes
-            recipes['Iron Sword'] = [
-                { amount: 2, name: 'Iron Ingot' },
-                { amount: 1, name: 'Stick' }
-            ];
-            recipes['Bomb'] = [
-                { amount: 3, name: 'Gunpowder' },
-                { amount: 2, name: 'Iron Ingot' }
-            ];
+            loadRecipes(); // Load saved recipes first
+
+            // Only add example recipes if no recipes are saved
+            if (Object.keys(recipes).length === 0) {
+                // Base materials (no recipe)
+                recipes['Iron Ore'] = [];
+                recipes['Coal'] = [];
+                recipes['Wood Log'] = [];
+                recipes['Sulfur'] = [];
+                recipes['Saltpeter'] = [];
+                recipes['Charcoal'] = [];
+                
+                // Crafted items
+                recipes['Wood Plank'] = [
+                    { amount: 1, name: 'Wood Log' }
+                ];
+                recipes['Stick'] = [
+                    { amount: 2, name: 'Wood Plank' }
+                ];
+                recipes['Iron Ingot'] = [
+                    { amount: 1, name: 'Iron Ore' },
+                    { amount: 1, name: 'Coal' }
+                ];
+                recipes['Gunpowder'] = [
+                    { amount: 1, name: 'Sulfur' },
+                    { amount: 1, name: 'Saltpeter' },
+                    { amount: 1, name: 'Charcoal' }
+                ];
+                
+                // Complex items that use other recipes
+                recipes['Iron Sword'] = [
+                    { amount: 2, name: 'Iron Ingot' },
+                    { amount: 1, name: 'Stick' }
+                ];
+                recipes['Bomb'] = [
+                    { amount: 3, name: 'Gunpowder' },
+                    { amount: 2, name: 'Iron Ingot' }
+                ];
+
+                saveRecipes(); // Save the example recipes
+            }
 
             updateRecipeList();
             updateDropdown();
