@@ -390,7 +390,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>⚡ Crafting Nexus</h1>
+            <h1>⚡ Factorio Crafting</h1>
             <p class="subtitle">Recipe Dependency Tracker</p>
         </header>
 
@@ -451,7 +451,7 @@
         const canvas = document.getElementById('recipe-canvas');
         const ctx = canvas.getContext('2d');
 
-        // Load recipes from localStorage on startup
+
         function loadRecipes() {
             const saved = localStorage.getItem('craftingRecipes');
             if (saved) {
@@ -464,7 +464,7 @@
             }
         }
 
-        // Save recipes to localStorage
+
         function saveRecipes() {
             localStorage.setItem('craftingRecipes', JSON.stringify(recipes));
         }
@@ -479,7 +479,6 @@
             }
         }
 
-        // Set canvas size
         function resizeCanvas() {
             const container = document.getElementById('canvas-container');
             canvas.width = container.clientWidth;
@@ -500,7 +499,7 @@
             const ingredients = parseIngredients(ingredientsText);
             recipes[itemName] = ingredients;
 
-            saveRecipes(); // Save to localStorage
+            saveRecipes();
             updateRecipeList();
             updateDropdown();
 
@@ -557,18 +556,16 @@
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'btn-remove';
                 deleteBtn.textContent = '✕';
-                deleteBtn.setAttribute('data-item', item);
-                deleteBtn.addEventListener('click', function(e) {
+                deleteBtn.onclick = (e) => {
                     e.stopPropagation();
-                    const itemToDelete = this.getAttribute('data-item');
-                    if (confirm(`Delete recipe for "${itemToDelete}"?`)) {
-                        delete recipes[itemToDelete];
+                    if (confirm(`Delete recipe for "${item}"?`)) {
+                        delete recipes[item];
                         saveRecipes();
                         updateRecipeList();
                         updateDropdown();
                         clearCanvas();
                     }
-                });
+                };
 
                 card.appendChild(contentDiv);
                 card.appendChild(deleteBtn);
@@ -775,13 +772,13 @@
             function calculateRecursive(itemName, amount) {
                 const recipe = recipes[itemName];
                 
-                // If no recipe exists or it's a base material (empty recipe array)
+
                 if (!recipe || recipe.length === 0) {
                     totals[itemName] = (totals[itemName] || 0) + amount;
                     return;
                 }
 
-                // If recipe exists, calculate ingredients recursively
+
                 for (const ingredient of recipe) {
                     calculateRecursive(ingredient.name, ingredient.amount * amount);
                 }
@@ -819,48 +816,14 @@
             resultDiv.appendChild(materialsDiv);
         }
 
-        // Add some example recipes on load
+
         window.onload = () => {
-            loadRecipes(); // Load saved recipes first
+            loadRecipes();
 
-            // Only add example recipes if no recipes are saved
+ 
             if (Object.keys(recipes).length === 0) {
-                // Base materials (no recipe)
-                recipes['Iron Ore'] = [];
-                recipes['Coal'] = [];
-                recipes['Wood Log'] = [];
-                recipes['Sulfur'] = [];
-                recipes['Saltpeter'] = [];
-                recipes['Charcoal'] = [];
-                
-                // Crafted items
-                recipes['Wood Plank'] = [
-                    { amount: 1, name: 'Wood Log' }
-                ];
-                recipes['Stick'] = [
-                    { amount: 2, name: 'Wood Plank' }
-                ];
-                recipes['Iron Ingot'] = [
-                    { amount: 1, name: 'Iron Ore' },
-                    { amount: 1, name: 'Coal' }
-                ];
-                recipes['Gunpowder'] = [
-                    { amount: 1, name: 'Sulfur' },
-                    { amount: 1, name: 'Saltpeter' },
-                    { amount: 1, name: 'Charcoal' }
-                ];
-                
-                // Complex items that use other recipes
-                recipes['Iron Sword'] = [
-                    { amount: 2, name: 'Iron Ingot' },
-                    { amount: 1, name: 'Stick' }
-                ];
-                recipes['Bomb'] = [
-                    { amount: 3, name: 'Gunpowder' },
-                    { amount: 2, name: 'Iron Ingot' }
-                ];
 
-                saveRecipes(); // Save the example recipes
+                saveRecipes();
             }
 
             updateRecipeList();
